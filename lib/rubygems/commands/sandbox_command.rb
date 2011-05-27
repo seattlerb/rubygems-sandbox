@@ -27,14 +27,14 @@ class Gem::Commands::SandboxCommand < Gem::Command
 
     # FIX: improve desc
     super("sandbox", "Sandbox a gem's command-line tools", defaults)
+
+    @scripts = []
   end
 
   # TODO: gem sandbox omnifocus --plugins omnifocus-redmine omnifocus-github
   # TODO: or should we autosupport pkg-plugin naming convention?
 
   def execute
-    # TODO Shouldn't be Gem.user_home. We want to install global wrapper
-    # TODO: need to write to /usr/bin/XXX so we need sudo support.
     get_all_gem_names.each do |gem_name|
       # Forces reset of known installed gems so subsequent repeats work
       Gem.use_paths nil, nil
@@ -46,10 +46,14 @@ class Gem::Commands::SandboxCommand < Gem::Command
       spec = inst.installed_gems.find { |s| s.name == gem_name }
       rewrite_executables dir, spec
 
-      inst.installed_gems.each do |spec|
-        say "Successfully installed #{spec.full_name}"
-      end
+      say "Successfully installed #{gem_name}"
     end
+
+    say ""
+    say "Copy the following scripts to any directory in your path to use them:"
+    say ""
+
+    say "cp #{@scripts.join ' '} _in_your_$PATH_"
   end
 
   def rewrite_executables dir, spec
@@ -65,6 +69,7 @@ class Gem::Commands::SandboxCommand < Gem::Command
       end
 
       # TODO: copy to /usr/bin/XXX
+      @scripts << path
     end
   end
 end
