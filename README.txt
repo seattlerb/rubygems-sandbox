@@ -1,26 +1,44 @@
-= rubygems_sandbox
+= rubygems-sandbox
 
-* FIX (url)
+* http://github.com/seattlerb/rubygems-sandbox
 
 == DESCRIPTION:
 
-FIX (describe your package)
+`gem sandbox` helps you manage your command-line tools and their
+dependencies. Sandboxed gems are installed in their own private
+repositories with their dependencies. This means that you don't have
+to have a rats nest of gems in your global repository in order to run
+popular command-tools like rdoc, flog, flay, rcov, etc.
 
-== FEATURES/PROBLEMS:
+`gem sandbox` has the following sub-commands:
 
-* FIX (list of features or problems)
+  * install gem_name ...             - install 1 or more gems
+  * plugin  gem_name plugin_name ... - install a gem and plugins for it
+  * remove  gem_name ...             - uninstall 1 or more gems
+  * help                             - show this output
+
+Once you install `gem sandbox` will output something like:
+
+    Copy the following scripts to any directory in your path to use them:
+
+    cp /Users/USER/.gem/sandboxes/TOOL/bin/TOOL _in_your_$PATH_
+
+Copy the scripts to a directory in your path (eg ~/bin or /usr/bin)
+and you're good to go.
 
 == SYNOPSIS:
 
-  FIX (code sample of usage)
+  % gem sandbox install rdoc flog flay
+  % cp ~/.gem/sandboxes/*/bin/* ~/bin
+  % sudo gem uninstall rdoc flog flay ruby_parser sexp_processor etc
 
 == REQUIREMENTS:
 
-* FIX (list of requirements)
+* rubygems 1.4 or higher
 
 == INSTALL:
 
-* sudo gem install rubygems_sandbox
+* sudo gem install rubygems-sandbox
 
 == LICENSE:
 

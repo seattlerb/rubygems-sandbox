@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 require 'rubygems/command'
 require 'rubygems/dependency_installer'
-# require 'rubygems/version_option'
-# require 'rubygems/text'
-# require 'rubygems/installer'
-# require 'rubygems/local_remote_options'
 
 ##
 # Gem command to "sandbox" command-line tools into their own private
@@ -25,35 +21,112 @@ class Gem::Commands::SandboxCommand < Gem::Command
       :version           => Gem::Requirement.default
     )
 
-    # FIX: improve desc
-    super("sandbox", "Sandbox a gem's command-line tools", defaults)
+    super("sandbox", "Privately install a command-line tool", defaults)
 
     @scripts = []
   end
 
-  # TODO: gem sandbox omnifocus --plugins omnifocus-redmine omnifocus-github
-  # TODO: or should we autosupport pkg-plugin naming convention?
+
+  def arguments # :nodoc:
+    ['SUBCOMMAND    one of: install, update, plugin, remove, help',
+     'GEMNAME       name of a gem to sandbox'].join "\n"
+  end
+
+  def usage # :nodoc:
+    "#{program_name} SUBCOMMAND GEMNAME(S)"
+  end
+
+  def description
+    <<-EOF
+
+`gem sandbox` helps you manage your command-line tools and their
+dependencies. Sandboxed gems are installed in their own private
+repositories with their dependencies. This means that you don't have
+to have a rats nest of gems in your global repository in order to run
+popular command-tools like rdoc, flog, flay, rcov, etc.
+
+`gem sandbox` has the following sub-commands:
+
+  * install gem_name ...             - install 1 or more gems
+  * plugin  gem_name plugin_name ... - install a gem and plugins for it
+  * remove  gem_name ...             - uninstall 1 or more gems
+  * help                             - show this output
+
+Once you install `gem sandbox` will output something like:
+
+    Copy the following scripts to any directory in your path to use them:
+
+    cp /Users/USER/.gem/sandboxes/TOOL/bin/TOOL _in_your_$PATH_
+
+Copy the scripts to a directory in your path (eg ~/bin or /usr/bin)
+and you're good to go.
+    EOF
+  end
 
   def execute
+    cmd = options[:args].shift
+
+    case cmd
+    when "install" then
+      install
+    when "plugin" then
+      plugin
+    when "remove" then
+      abort "not implemented yet"
+    when "help", "usage" then
+      show_help
+      abort
+    else
+      alert_error "Unknown sandbox subcommand: #{cmd}"
+      show_help
+      abort
+    end
+  end
+
+  def install
     get_all_gem_names.each do |gem_name|
-      # Forces reset of known installed gems so subsequent repeats work
-      Gem.use_paths nil, nil
-
-      dir = File.join Gem.user_home, '.gem', "sandboxes", gem_name
-      inst = Gem::DependencyInstaller.new options.merge(:install_dir => dir)
-      inst.install gem_name, options[:version]
-
-      spec = inst.installed_gems.find { |s| s.name == gem_name }
-      rewrite_executables dir, spec
-
-      say "Successfully installed #{gem_name}"
+      install_gem gem_name
     end
 
+    list_scripts
+  end
+
+  def plugin
+    gem_name, *plugins = options[:args]
+    dir                = sandbox_dir gem_name
+
+    install_gem gem_name, dir
+
+    plugins.each do |plugin_name|
+      inst = Gem::DependencyInstaller.new options.merge(:install_dir => dir)
+      inst.install plugin_name, options[:version]
+    end
+
+    list_scripts
+  end
+
+  def list_scripts
     say ""
     say "Copy the following scripts to any directory in your path to use them:"
     say ""
-
     say "cp #{@scripts.join ' '} _in_your_$PATH_"
+  end
+
+  def sandbox_dir gem_name
+    File.join Gem.user_home, '.gem', "sandboxes", gem_name
+  end
+
+  def install_gem gem_name, dir = sandbox_dir(gem_name)
+    # Forces reset of known installed gems so subsequent repeats work
+    Gem.use_paths nil, nil
+
+    inst = Gem::DependencyInstaller.new options.merge(:install_dir => dir)
+    inst.install gem_name, options[:version]
+
+    spec = inst.installed_gems.find { |s| s.name == gem_name }
+    rewrite_executables dir, spec
+
+    say "Successfully installed #{gem_name}"
   end
 
   def rewrite_executables dir, spec
@@ -68,24 +141,7 @@ class Gem::Commands::SandboxCommand < Gem::Command
         f.write script
       end
 
-      # TODO: copy to /usr/bin/XXX
       @scripts << path
     end
   end
 end
-
-# def arguments # :nodoc:
-#   'GEMNAME       name of an installed gem to sandbox'
-# end
-#
-# def defaults_str # :nodoc:
-#   "--version='>= 0'"
-# end
-#
-# def usage # :nodoc:
-#   "#{program_name} GEMNAME [options]"
-# end
-#
-# def description
-#   "TODO"
-# end
