@@ -5,4 +5,3 @@ README.txt
 Rakefile
 lib/rubygems/commands/sandbox_command.rb
 lib/rubygems_plugin.rb
-test/test_rubygems_sandbox.rb
