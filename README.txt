@@ -4,20 +4,20 @@
 
 == DESCRIPTION:
 
-`gem sandbox` helps you manage your command-line tools and their
+gem sandbox helps you manage your command-line tools and their
 dependencies. Sandboxed gems are installed in their own private
 repositories with their dependencies. This means that you don't have
 to have a rats nest of gems in your global repository in order to run
 popular command-tools like rdoc, flog, flay, rcov, etc.
 
-`gem sandbox` has the following sub-commands:
+gem sandbox has the following sub-commands:
 
   * install gem_name ...             - install 1 or more gems
   * plugin  gem_name plugin_name ... - install a gem and plugins for it
   * remove  gem_name ...             - uninstall 1 or more gems
   * help                             - show this output
 
-Once you install `gem sandbox` will output something like:
+Once you install gem sandbox will output something like:
 
     Copy the following scripts to any directory in your path to use them:
 

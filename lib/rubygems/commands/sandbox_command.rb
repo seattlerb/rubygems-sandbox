@@ -47,10 +47,10 @@ popular command-tools like rdoc, flog, flay, rcov, etc.
 
 `gem sandbox` has the following sub-commands:
 
-  * install gem_name ...             - install 1 or more gems
-  * plugin  gem_name plugin_name ... - install a gem and plugins for it
-  * remove  gem_name ...             - uninstall 1 or more gems
-  * help                             - show this output
+  * install   gem_name ...             - install 1 or more gems
+  * plugin    gem_name plugin_name ... - install a gem and plugins for it
+  * uninstall gem_name ...             - uninstall 1 or more gems
+  * help                               - show this output
 
 Once you install `gem sandbox` will output something like:
 
@@ -71,7 +71,7 @@ and you're good to go.
       install
     when "plugin" then
       plugin
-    when "remove" then
+    when "uninstall" then
       abort "not implemented yet"
     when "help", "usage" then
       show_help
