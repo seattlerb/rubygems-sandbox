@@ -47,6 +47,7 @@ popular command-tools like rdoc, flog, flay, rcov, etc.
 
 `gem sandbox` has the following sub-commands:
 
+  * list                               - list current sandboxes
   * install   gem_name ...             - install 1 or more gems
   * plugin    gem_name plugin_name ... - install a gem and plugins for it
   * uninstall gem_name ...             - uninstall 1 or more gems
@@ -67,6 +68,8 @@ and you're good to go.
     cmd = options[:args].shift
 
     case cmd
+    when "list" then
+      list
     when "install" then
       install
     when "plugin" then
@@ -80,6 +83,16 @@ and you're good to go.
       alert_error "Unknown sandbox subcommand: #{cmd}"
       show_help
       abort
+    end
+  end
+
+  def list
+    if File.directory? sandbox_home then
+      Dir.chdir sandbox_home do
+        say Dir["*"].join "\n"
+      end
+    else
+      say "No sandboxes installed."
     end
   end
 
@@ -112,8 +125,12 @@ and you're good to go.
     say "cp #{@scripts.join ' '} _in_your_$PATH_"
   end
 
+  def sandbox_home
+    File.join Gem.user_home, '.gem', "sandboxes"
+  end
+
   def sandbox_dir gem_name
-    File.join Gem.user_home, '.gem', "sandboxes", gem_name
+    File.join sandbox_home, gem_name
   end
 
   def install_gem gem_name, dir = sandbox_dir(gem_name)
