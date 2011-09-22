@@ -49,6 +49,7 @@ popular command-tools like rdoc, flog, flay, rcov, etc.
 
   * list                               - list current sandboxes
   * install   gem_name ...             - install 1 or more gems
+  * outdated  gem_name ...             - check 1 or more gems for outdated deps
   * plugin    gem_name plugin_name ... - install a gem and plugins for it
   * uninstall gem_name ...             - uninstall 1 or more gems
   * help                               - show this output
@@ -72,6 +73,8 @@ and you're good to go.
       list
     when "install" then
       install
+    when "outdated" then
+      outdated
     when "plugin" then
       plugin
     when "uninstall" then
@@ -102,6 +105,26 @@ and you're good to go.
     end
 
     list_scripts
+  end
+
+  def outdated
+    get_all_gem_names.each do |gem_name|
+      dir = sandbox_dir(gem_name)
+
+      # Forces reset of known installed gems so subsequent repeats work
+      Gem.use_paths dir, nil
+
+      Gem::Specification.outdated.sort.each do |name|
+        local   = Gem::Specification.find_all_by_name(name).max
+        dep     = Gem::Dependency.new local.name, ">= #{local.version}"
+        remotes = Gem::SpecFetcher.fetcher.fetch dep
+
+        next if remotes.empty?
+
+        remote = remotes.last.first
+        say "#{local.name} (#{local.version} < #{remote.version})"
+      end
+    end
   end
 
   def plugin
