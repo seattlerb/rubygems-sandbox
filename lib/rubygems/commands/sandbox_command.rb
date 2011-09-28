@@ -15,7 +15,7 @@ class Gem::Commands::UpdateCommand < Gem::Command # HACK
 end
 
 class Gem::Commands::SandboxCommand < Gem::Command
-  VERSION = '1.0.0'
+  VERSION = '1.1.0'
 
   def initialize
     defaults = Gem::DependencyInstaller::DEFAULT_OPTIONS.merge(
