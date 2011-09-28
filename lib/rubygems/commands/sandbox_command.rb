@@ -10,6 +10,10 @@ class Gem::DependencyInstaller
   attr_accessor :bin_dir
 end
 
+class Gem::Commands::UpdateCommand < Gem::Command # HACK
+  attr_accessor :updated, :installer
+end
+
 class Gem::Commands::SandboxCommand < Gem::Command
   VERSION = '1.0.0'
 
@@ -17,6 +21,7 @@ class Gem::Commands::SandboxCommand < Gem::Command
     defaults = Gem::DependencyInstaller::DEFAULT_OPTIONS.merge(
       :generate_rdoc     => false,
       :generate_ri       => false,
+      :document          => [],
       :format_executable => false,
       :version           => Gem::Requirement.default
     )
@@ -28,7 +33,7 @@ class Gem::Commands::SandboxCommand < Gem::Command
 
 
   def arguments # :nodoc:
-    ['SUBCOMMAND    one of: install, update, plugin, remove, help',
+    ['SUBCOMMAND    one of: list, install, help, etc... see help for full list',
      'GEMNAME       name of a gem to sandbox'].join "\n"
   end
 
@@ -52,6 +57,8 @@ popular command-tools like rdoc, flog, flay, rcov, etc.
   * outdated  gem_name ...             - check 1 or more gems for outdated deps
   * plugin    gem_name plugin_name ... - install a gem and plugins for it
   * uninstall gem_name ...             - uninstall 1 or more gems
+  * cleanup   gem_name ...             - remove older gem deps
+  * update    gem_name ...             - update 1 or more gems
   * help                               - show this output
 
 Once you install `gem sandbox` will output something like:
@@ -75,6 +82,10 @@ and you're good to go.
       install
     when "outdated" then
       outdated
+    when "update" then
+      update
+    when "clean" then
+      clean
     when "plugin" then
       plugin
     when "uninstall" then
@@ -89,11 +100,18 @@ and you're good to go.
     end
   end
 
-  def list
+  def sandboxes
     if File.directory? sandbox_home then
       Dir.chdir sandbox_home do
-        say Dir["*"].join "\n"
+        Dir["*"]
       end
+    end
+  end
+
+  def list
+    boxes = self.sandboxes
+    if boxes then
+      say boxes.join "\n"
     else
       say "No sandboxes installed."
     end
@@ -112,7 +130,8 @@ and you're good to go.
       dir = sandbox_dir(gem_name)
 
       # Forces reset of known installed gems so subsequent repeats work
-      Gem.use_paths dir, nil
+      Gem.use_paths dir, dir
+      Gem.refresh
 
       Gem::Specification.outdated.sort.each do |name|
         local   = Gem::Specification.find_all_by_name(name).max
@@ -123,6 +142,80 @@ and you're good to go.
 
         remote = remotes.last.first
         say "#{local.name} (#{local.version} < #{remote.version})"
+      end
+    end
+  end
+
+  def update
+    require 'rubygems/commands/update_command'
+
+    get_all_gem_names.each do |gem_name|
+      dir = sandbox_dir gem_name
+
+      # Forces reset of known installed gems so subsequent repeats work
+      Gem.use_paths dir, dir
+      Gem.refresh
+
+      updater = Gem::Commands::UpdateCommand.new
+      updater.updated = [] # HACK: this is stupid
+      updater.installer =
+        Gem::DependencyInstaller.new(options.merge(:install_dir => dir))
+
+      Gem::Specification.outdated.sort.each do |name|
+        updater.update_gem name
+      end
+    end
+  end
+
+  def clean
+    require 'rubygems/uninstaller'
+
+    options[:args] = sandboxes if options[:args].empty?
+
+    get_all_gem_names.each do |gem_name|
+      dir = sandbox_dir gem_name
+
+      # Forces reset of known installed gems so subsequent repeats work
+      Gem.use_paths dir, dir # FUCK ME this is the worst code ever
+      Gem.refresh
+
+      primary_gems = {}
+
+      Gem::Specification.each do |spec|
+        if primary_gems[spec.name].nil? or
+            primary_gems[spec.name].version < spec.version then
+          primary_gems[spec.name] = spec
+        end
+      end
+
+      gems_to_cleanup = Gem::Specification.to_a
+
+      gems_to_cleanup = gems_to_cleanup.select { |spec|
+        primary_gems[spec.name].version != spec.version
+      }
+
+      deplist = Gem::DependencyList.new
+      gems_to_cleanup.uniq.each do |spec| deplist.add spec end
+
+      deps = deplist.strongly_connected_components.flatten.reverse
+
+      deps.each do |spec|
+        options[:args] = [spec.name]
+
+        uninstall_options = {
+          :executables => false,
+          :version => "= #{spec.version}",
+        }
+
+        uninstaller = Gem::Uninstaller.new spec.name, uninstall_options
+
+        begin
+          uninstaller.uninstall
+        rescue Gem::DependencyRemovalException, Gem::InstallError,
+          Gem::GemNotInHomeException, Gem::FilePermissionError => e
+          say "Unable to uninstall #{spec.full_name}:"
+          say "\t#{e.class}: #{e.message}"
+        end
       end
     end
   end
