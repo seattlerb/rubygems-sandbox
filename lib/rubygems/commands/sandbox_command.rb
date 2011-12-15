@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 require 'rubygems/command'
 require 'rubygems/dependency_installer'
+require 'rubygems/commands/update_command' # for the hack below
 
 ##
 # Gem command to "sandbox" command-line tools into their own private
