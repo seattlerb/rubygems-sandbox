@@ -57,6 +57,7 @@ popular command-tools like rdoc, flog, flay, rcov, etc.
   * install   gem_name ...             - install 1 or more gems
   * outdated  gem_name ...             - check 1 or more gems for outdated deps
   * plugin    gem_name plugin_name ... - install a gem and plugins for it
+  * list                               - list sandboxed gems
   * uninstall gem_name ...             - uninstall 1 or more gems
   * cleanup   gem_name ...             - remove older gem deps
   * update    gem_name ...             - update 1 or more gems
@@ -91,6 +92,8 @@ and you're good to go.
       plugin
     when "uninstall" then
       abort "not implemented yet"
+    when "list" then
+      list
     when "help", "usage" then
       show_help
       abort
@@ -248,6 +251,20 @@ and you're good to go.
 
   def sandbox_dir gem_name
     File.join sandbox_home, gem_name
+  end
+
+  def list
+    say ""
+    say "Sandboxed gems:"
+    Dir[sandbox_dir('*')].each do |path|
+      # This is totally a giant hack, but I don't know gem internals well
+      # enough to look it up properly
+      gem = File.split(path).last
+      gemdir = Dir[File.join path, 'gems', "#{gem}-*"].first
+      version = gemdir.match(/([\d.]+)$/)[1]
+      # TODO: gem list includes "ruby" after the version, probably useful info
+      say "#{gem} (#{version})"
+    end
   end
 
   def install_gem gem_name, dir = sandbox_dir(gem_name)
