@@ -1,6 +1,7 @@
 = rubygems-sandbox
 
-home :: https://github.com/seattlerb/rubygems-sandbox
+home :: http://www.zenspider.com/projects/rubygems-sandbox.html
+code :: https://github.com/seattlerb/rubygems-sandbox
 rdoc :: http://seattlerb.rubyforge.org/rubygems-sandbox
 
 == DESCRIPTION:
