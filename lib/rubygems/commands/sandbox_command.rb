@@ -12,7 +12,7 @@ class Gem::DependencyInstaller
 end
 
 class Gem::Commands::UpdateCommand < Gem::Command # HACK
-  attr_accessor :updated, :installer
+  attr_accessor :updated
 end
 
 class Gem::Commands::SandboxCommand < Gem::Command
@@ -90,7 +90,7 @@ and you're good to go.
     when "plugin" then
       plugin
     when "uninstall" then
-      abort "not implemented yet"
+      uninstall
     when "help", "usage" then
       show_help
       abort
@@ -124,6 +124,15 @@ and you're good to go.
     end
 
     list_scripts
+  end
+
+  def uninstall
+    get_all_gem_names.each do |gem_name|
+      uninstall_gem gem_name
+    end
+
+    say ""
+    say "You will need to manually clean up any script wrappers you copied."
   end
 
   def outdated
@@ -261,6 +270,15 @@ and you're good to go.
     rewrite_executables dir, spec
 
     say "Successfully installed #{gem_name}"
+  end
+
+  def uninstall_gem gem_name, dir = sandbox_dir(gem_name)
+    # Forces reset of known installed gems so subsequent repeats work
+    Gem.use_paths nil, nil
+
+    require "fileutils"
+
+    FileUtils.rm_rf dir, :verbose => true
   end
 
   def rewrite_executables dir, spec

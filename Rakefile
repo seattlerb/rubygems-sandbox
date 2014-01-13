@@ -11,7 +11,7 @@ Hoe.spec "rubygems-sandbox" do
 
   self.rubyforge_name = "seattlerb"
 
-  require_rubygems_version "~> 1.4"
+  require_rubygems_version [">= 1.4", "< 3"]
 end
 
 # vim: syntax=ruby
