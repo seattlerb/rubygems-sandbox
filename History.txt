@@ -1,3 +1,15 @@
+=== 1.2.0 / 2014-02-10
+
+* 2 minor enhancements:
+
+  * Extended required rubygems version to 2.x.
+  * FINALLY implemented gem sandbox uninstall.
+
+* 2 bug fixes:
+
+  * 2.0: Removed warnings
+  * Fixed code/home urls in readme/gem.
+
 === 1.1.1 / 2011-12-15
 
 * 1 bug fix:
