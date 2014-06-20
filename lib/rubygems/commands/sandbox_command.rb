@@ -85,7 +85,7 @@ and you're good to go.
       outdated
     when "update" then
       update
-    when "clean" then
+    when "clean", "cleanup" then
       clean
     when "plugin" then
       plugin
@@ -144,9 +144,9 @@ and you're good to go.
       Gem.refresh
 
       Gem::Specification.outdated.sort.each do |name|
-        local   = Gem::Specification.find_all_by_name(name).max
-        dep     = Gem::Dependency.new local.name, ">= #{local.version}"
-        remotes = Gem::SpecFetcher.fetcher.fetch dep
+        local      = Gem::Specification.find_all_by_name(name).max
+        dep        = Gem::Dependency.new local.name, ">= #{local.version}"
+        remotes, _ = Gem::SpecFetcher.fetcher.spec_for_dependency dep
 
         next if remotes.empty?
 
