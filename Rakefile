@@ -9,6 +9,8 @@ Hoe.plugin :seattlerb
 Hoe.spec "rubygems-sandbox" do
   developer "Ryan Davis", "ryand-ruby@zenspider.com"
 
+  license "MIT"
+
   require_rubygems_version [">= 1.4", "< 3"]
 end
 
