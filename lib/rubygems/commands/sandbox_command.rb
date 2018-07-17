@@ -285,6 +285,10 @@ and you're good to go.
     spec.executables.each do |filename|
       path = File.join dir, "bin", filename
       env  = "ENV['GEM_HOME'] = ENV['GEM_PATH'] = #{dir.inspect}"
+      env = <<-"EOM".gsub(/^ +/, '')
+        ENV['GEM_HOME'] = #{dir.inspect}
+        Gem.paths = ENV
+      EOM
 
       script = File.read path
       script.sub!(/require 'rubygems'/, "#{env}\n\\&")
