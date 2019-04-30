@@ -11,7 +11,7 @@ Hoe.spec "rubygems-sandbox" do
 
   license "MIT"
 
-  require_rubygems_version [">= 1.4", "< 3"]
+  require_rubygems_version [">= 1.4", "< 4"]
 end
 
 # vim: syntax=ruby
