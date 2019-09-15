@@ -3,25 +3,26 @@ require 'rubygems/command'
 require 'rubygems/dependency_installer'
 require 'rubygems/commands/update_command' # for the hack below
 
+Gem.done_installing_hooks.clear
+
+class Gem::DependencyInstaller # :nodoc:
+  attr_accessor :bin_dir # HACK
+end
+
+class Gem::Commands::UpdateCommand < Gem::Command # :nodoc:
+  attr_accessor :updated # HACK
+  attr_writer :installer # HACK
+end
+
 ##
 # Gem command to "sandbox" command-line tools into their own private
 # gem repos but with a globally command-line wrapper.
-
-class Gem::DependencyInstaller
-  attr_accessor :bin_dir
-end
-
-class Gem::Commands::UpdateCommand < Gem::Command # HACK
-  attr_accessor :updated
-end
 
 class Gem::Commands::SandboxCommand < Gem::Command
   VERSION = "1.3.0"
 
   def initialize
     defaults = Gem::DependencyInstaller::DEFAULT_OPTIONS.merge(
-      :generate_rdoc     => false,
-      :generate_ri       => false,
       :document          => [],
       :format_executable => false,
       :version           => Gem::Requirement.default
