@@ -1,3 +1,12 @@
+=== 1.3.1 / 2019-12-12
+
+* 4 bug fixes:
+
+  * Bump supported rubygems version.
+  * Fixed bug with newer rubygems not exposing UpdateCommand#installer=.
+  * Fixed gem pathing via Gem.paths= and only set GEM_HOME.
+  * Fixed rubygems stubbornly installing rdoc despite setting up options correctly.
+
 === 1.3.0 / 2014-08-06
 
 * 2 bug fixes:
@@ -37,4 +46,3 @@
 * 1 major enhancement
 
   * Birthday!
-

@@ -19,7 +19,7 @@ end
 # gem repos but with a globally command-line wrapper.
 
 class Gem::Commands::SandboxCommand < Gem::Command
-  VERSION = "1.3.0"
+  VERSION = "1.3.1"
 
   def initialize
     defaults = Gem::DependencyInstaller::DEFAULT_OPTIONS.merge(
