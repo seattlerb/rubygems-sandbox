@@ -257,7 +257,9 @@ and you're good to go.
   end
 
   def sandbox_dir gem_name
-    File.join sandbox_home, gem_name
+    dir = File.join sandbox_home, gem_name
+    warn "WARNING: #{gem_name} might not be a sandbox" unless File.exist? dir
+    dir
   end
 
   def install_gem gem_name, dir = sandbox_dir(gem_name)
