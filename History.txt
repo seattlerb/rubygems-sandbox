@@ -1,3 +1,9 @@
+=== 1.3.2 / 2024-08-27
+
+* 1 bug fix:
+
+  * Warn if it might not be a sandbox.
+
 === 1.3.1 / 2019-12-12
 
 * 4 bug fixes:
